@@ -3,16 +3,26 @@ DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 
 def convert_to_string_from(week_days_numbers)
   data = week_days_numbers.split(',')
-  result=[]
-  case data.first
+  output = convert_to_numbers(data)
+  grouped_numbers = group_numbers(output)
+  result = convert_to_range(grouped_numbers)
+  result.join(", ")
+end
+
+def convert_to_numbers(array)
+  case array.first
   when *Array("1".."7")
-    data.map! {|data_element| data_element.to_i}
+    array.map {|data_element| data_element.to_i}
   when *DAYS_ABRV
-    data.map! {|data_element| DAYS_ABRV.index(data_element)+1}
+    array.map {|data_element| DAYS_ABRV.index(data_element)+1}
   when *DAYS
-    data.map! {|data_element| DAYS.index(data_element)+1}
+    array.map {|data_element| DAYS.index(data_element)+1}
   end
-  data.each {|day_num|
+end
+
+def group_numbers(array)
+  result = []
+  array.each do |day_num|
     last_result = result.pop || []
     if last_result.length == 0 || day_num == last_result.last + 1
       last_result << day_num
@@ -21,20 +31,27 @@ def convert_to_string_from(week_days_numbers)
       result << last_result
       result << [day_num]
     end
-  }
-  iterator = 0
-  while iterator < result.length
-    if result[iterator].length == 1
-      result[iterator] = DAYS_ABRV[result[iterator].last-1]
-    elsif  result[iterator].length == 2
-      temp = DAYS_ABRV[result[iterator].last-1]
-      result[iterator] = DAYS_ABRV[result[iterator].first-1]
-      result[iterator+1] = temp
-      iterator += 1
-    else
-      result[iterator] = DAYS_ABRV[result[iterator].first-1] + "-" + DAYS_ABRV[result[iterator].last-1]
-    end
-    iterator += 1
   end
-  result = result.join(", ")
+  result
+end
+
+def convert_to_range(array)
+  iterator = 0
+  result = []
+  array.each do |nested_arr|
+    case nested_arr.length
+    when 1
+      result << get_week_name(nested_arr.last)
+    when 2
+      result << get_week_name(nested_arr.first)
+      result << get_week_name(nested_arr.last)
+    else
+      result << get_week_name(nested_arr.first) + "-" + get_week_name(nested_arr.last)
+    end
+  end
+  result
+end
+
+def get_week_name(index)
+  DAYS_ABRV[index-1]
 end
